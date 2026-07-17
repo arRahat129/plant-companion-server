@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    // ── Output ────────────────────────────────────────────────
+    "target": "ES2022",           // Compile to modern JS
+    "outDir": "./dist",           // Compiled files go here
+    "rootDir": "./src",           // TypeScript source files are here
+
+    // ── Module System ─────────────────────────────────────────
+    // NodeNext = use ESM (import/export) just like package.json "type":"module"
+    // Important: When importing .ts files, you must write .js in the import path
+    // e.g.:  import { foo } from './utils/foo.js'  ← correct (even though file is .ts)
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    // ── Type Safety ───────────────────────────────────────────
+    "strict": true,               // Enable all strict type checks
+    "esModuleInterop": true,      // Allows default import from CommonJS modules
+    "skipLibCheck": true,         // Skip type-checking of .d.ts files in node_modules
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true     // Allows: import data from './data.json'
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "scripts"]
+}

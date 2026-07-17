@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PlantCompanion API — Server</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-400: #4ade80;
+      --green-500: #22c55e;
+      --green-600: #16a34a;
+      --green-900: #052e16;
+      --bg: #050d05;
+      --surface: #0d1a0d;
+      --surface-2: #132013;
+      --border: rgba(74, 222, 128, 0.12);
+      --text: #f0fdf4;
+      --muted: #86efac;
+      --dim: #4b7a58;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated Background ── */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(74,222,128,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,222,128,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    .bg-glow {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(34,197,94,0.15), transparent);
+    }
+
+    /* ── Layout ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; position: relative; z-index: 1; }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      padding: 1rem 0;
+      background: rgba(5, 13, 5, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav .inner { display: flex; align-items: center; justify-content: space-between; max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+    .nav-brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+    .nav-brand .logo { width: 36px; height: 36px; background: linear-gradient(135deg, var(--green-500), var(--green-400)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; box-shadow: 0 0 20px rgba(34,197,94,0.3); }
+    .nav-brand span { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+    .nav-badge { font-size: 0.65rem; background: var(--green-900); border: 1px solid var(--green-600); color: var(--green-400); padding: 0.15rem 0.5rem; border-radius: 999px; font-weight: 500; }
+
+    /* ── Status Pill ── */
+    .status-pill {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: rgba(74,222,128,0.07); border: 1px solid var(--border);
+      border-radius: 999px; padding: 0.4rem 1rem; font-size: 0.8rem; color: var(--muted);
+    }
+    .status-dot { width: 8px; height: 8px; background: var(--green-500); border-radius: 50%; animation: pulse 2s ease-in-out infinite; box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); } 50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); } }
+
+    /* ── Hero ── */
+    .hero { padding: 6rem 0 4rem; text-align: center; }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2);
+      border-radius: 999px; padding: 0.35rem 1rem; font-size: 0.8rem;
+      color: var(--green-400); margin-bottom: 1.75rem; font-weight: 500;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; line-height: 1.1;
+      background: linear-gradient(135deg, #fff 30%, var(--green-400) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 1.25rem; letter-spacing: -0.02em;
+    }
+    .hero p { font-size: 1.15rem; color: var(--dim); max-width: 560px; margin: 0 auto 2.5rem; line-height: 1.7; }
+    .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem 1.5rem; border-radius: 10px; font-size: 0.95rem;
+      font-weight: 500; text-decoration: none; transition: all 0.2s; cursor: pointer; border: none;
+    }
+    .btn-primary { background: var(--green-500); color: #000; box-shadow: 0 0 20px rgba(34,197,94,0.25); }
+    .btn-primary:hover { background: var(--green-400); box-shadow: 0 0 30px rgba(34,197,94,0.4); transform: translateY(-1px); }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: rgba(74,222,128,0.4); color: var(--green-400); transform: translateY(-1px); }
+
+    /* ── Stats Row ── */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border-radius: 16px; overflow: hidden; margin: 3rem 0; border: 1px solid var(--border); }
+    .stat { background: var(--surface); padding: 1.75rem; text-align: center; }
+    .stat-value { font-size: 2rem; font-weight: 700; color: var(--green-400); }
+    .stat-label { font-size: 0.8rem; color: var(--dim); margin-top: 0.25rem; }
+
+    /* ── Section ── */
+    section { padding: 3rem 0; }
+    .section-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text); display: flex; align-items: center; gap: 0.75rem; }
+    .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── Endpoint Cards ── */
+    .endpoints { display: flex; flex-direction: column; gap: 0.75rem; }
+    .endpoint {
+      display: grid; grid-template-columns: auto 1fr auto;
+      align-items: center; gap: 1rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1rem 1.25rem;
+      transition: all 0.2s; text-decoration: none; cursor: default;
+    }
+    .endpoint:hover { border-color: rgba(74,222,128,0.3); background: var(--surface-2); transform: translateX(4px); }
+    .method {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 500;
+      padding: 0.2rem 0.6rem; border-radius: 6px; min-width: 52px; text-align: center;
+    }
+    .method.get { background: rgba(34,197,94,0.15); color: var(--green-400); }
+    .method.post { background: rgba(59,130,246,0.15); color: #93c5fd; }
+    .method.put { background: rgba(245,158,11,0.15); color: #fcd34d; }
+    .method.delete { background: rgba(239,68,68,0.15); color: #fca5a5; }
+    .endpoint-path { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--text); }
+    .endpoint-desc { font-size: 0.8rem; color: var(--dim); }
+    .endpoint-tag { font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 999px; background: rgba(74,222,128,0.07); color: var(--muted); border: 1px solid var(--border); white-space: nowrap; }
+    .endpoint-tag.protected { background: rgba(245,158,11,0.07); color: #fcd34d; border-color: rgba(245,158,11,0.2); }
+
+    /* ── Info Cards ── */
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.5rem; transition: all 0.25s;
+    }
+    .card:hover { border-color: rgba(74,222,128,0.3); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .card-icon { font-size: 2rem; margin-bottom: 1rem; }
+    .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .card p { font-size: 0.85rem; color: var(--dim); line-height: 1.6; }
+
+    /* ── Code Block ── */
+    .code-block {
+      background: #020b02; border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; margin-top: 1rem;
+    }
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.6rem 1rem; background: var(--surface);
+      border-bottom: 1px solid var(--border); font-size: 0.78rem; color: var(--dim);
+    }
+    .code-dots { display: flex; gap: 6px; }
+    .code-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .code-body { padding: 1.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.8; overflow-x: auto; }
+    .c-green { color: var(--green-400); }
+    .c-blue  { color: #93c5fd; }
+    .c-yellow{ color: #fcd34d; }
+    .c-gray  { color: #6b7280; }
+    .c-white { color: #f9fafb; }
+    .c-str   { color: #fca5a5; }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 4rem; padding: 2rem 0;
+      border-top: 1px solid var(--border);
+      text-align: center; color: var(--dim); font-size: 0.85rem;
+    }
+    footer a { color: var(--green-400); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── JWKS highlight box ── */
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(34,197,94,0.07), rgba(34,197,94,0.03));
+      border: 1px solid rgba(34,197,94,0.25); border-radius: 16px; padding: 1.5rem 2rem;
+      display: flex; align-items: flex-start; gap: 1rem; margin: 2rem 0;
+    }
+    .highlight-box .icon { font-size: 1.5rem; margin-top: 0.1rem; flex-shrink: 0; }
+    .highlight-box h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .highlight-box p { font-size: 0.85rem; color: var(--dim); line-height: 1.6; }
+
+    @media (max-width: 640px) {
+      .stats { grid-template-columns: 1fr; }
+      .endpoint { grid-template-columns: auto 1fr; }
+      .endpoint-tag { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <!-- Nav -->
+  <nav>
+    <div class="inner">
+      <a class="nav-brand" href="/">
+        <div class="logo">🌿</div>
+        <span>PlantCompanion</span>
+        <span class="nav-badge">API v1</span>
+      </a>
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        Server Online
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-tag">🚀 REST API &nbsp;·&nbsp; Express + TypeScript</div>
+      <h1>PlantCompanion<br/>Backend API</h1>
+      <p>A production-ready Express server powering the PlantCompanion AI plant care application. JWT-secured, MongoDB-backed, fully typed.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#endpoints">📡 View Endpoints</a>
+        <a class="btn btn-ghost" href="/api/health">❤️ Health Check</a>
+        <a class="btn btn-ghost" href="/api/auth/jwks">🔑 JWKS</a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value">5000</div>
+        <div class="stat-label">Default Port</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">RS256</div>
+        <div class="stat-label">JWT Algorithm</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">ESM</div>
+        <div class="stat-label">Module System</div>
+      </div>
+    </div>
+
+    <!-- JWKS Highlight -->
+    <div class="highlight-box">
+      <div class="icon">🔑</div>
+      <div>
+        <h4>JWKS Endpoint — How JWT Verification Works</h4>
+        <p>
+          The server signs tokens with a <strong style="color:var(--green-400)">private RSA key</strong> (kept secret in <code style="font-size:0.8em;color:#fcd34d">.env</code>).
+          The <strong style="color:var(--green-400)">public key</strong> is served at <code style="font-size:0.8em;color:#fcd34d">GET /api/auth/jwks</code>.
+          Your Next.js client fetches it to verify tokens client-side — no extra server round-trip needed.
+        </p>
+      </div>
+    </div>
+
+    <!-- Endpoints -->
+    <section id="endpoints">
+      <div class="section-title">📡 API Endpoints</div>
+      <div class="endpoints">
+
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <div>
+            <div class="endpoint-path">/api/health</div>
+            <div class="endpoint-desc">Server health check — returns status and timestamp</div>
+          </div>
+          <span class="endpoint-tag">Public</span>
+        </div>
+
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <div>
+            <div class="endpoint-path">/api/auth/jwks</div>
+            <div class="endpoint-desc">RSA public key set for client-side JWT verification</div>
+          </div>
+          <span class="endpoint-tag">Public</span>
+        </div>
+
+        <div class="endpoint">
+          <span class="method post">POST</span>
+          <div>
+            <div class="endpoint-path">/api/auth/register</div>
+            <div class="endpoint-desc">Create a new account — returns JWT token</div>
+          </div>
+          <span class="endpoint-tag">Public</span>
+        </div>
+
+        <div class="endpoint">
+          <span class="method post">POST</span>
+          <div>
+            <div class="endpoint-path">/api/auth/login</div>
+            <div class="endpoint-desc">Login with email + password — returns JWT token</div>
+          </div>
+          <span class="endpoint-tag">Public</span>
+        </div>
+
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <div>
+            <div class="endpoint-path">/api/auth/me</div>
+            <div class="endpoint-desc">Get current logged-in user's profile</div>
+          </div>
+          <span class="endpoint-tag protected">🔒 Bearer Token</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section>
+      <div class="section-title">⚡ Quick Start</div>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots">
+            <div class="code-dot" style="background:#ff5f57"></div>
+            <div class="code-dot" style="background:#febc2e"></div>
+            <div class="code-dot" style="background:#28c840"></div>
+          </div>
+          <span>Login → Get Token → Call Protected Route</span>
+        </div>
+        <div class="code-body">
+<span class="c-gray"># 1. Login</span>
+<span class="c-blue">curl</span> <span class="c-green">-X POST</span> http://localhost:5000/api/auth/login \
+  <span class="c-green">-H</span> <span class="c-str">"Content-Type: application/json"</span> \
+  <span class="c-green">-d</span> <span class="c-str">'{"email":"user@example.com","password":"secret"}'</span>
+
+<span class="c-gray"># Response → { "token": "eyJhbGci..." }</span>
+
+<span class="c-gray"># 2. Use the token on protected routes</span>
+<span class="c-blue">curl</span> http://localhost:5000/api/auth/me \
+  <span class="c-green">-H</span> <span class="c-str">"Authorization: Bearer eyJhbGci..."</span>
+
+<span class="c-gray"># 3. Verify token in Next.js (client-side)</span>
+<span class="c-yellow">import</span> <span class="c-white">{ createRemoteJWKSet, jwtVerify }</span> <span class="c-yellow">from</span> <span class="c-str">'jose'</span>
+
+<span class="c-yellow">const</span> <span class="c-white">JWKS</span> <span class="c-green">=</span> <span class="c-blue">createRemoteJWKSet</span>(
+  <span class="c-yellow">new</span> <span class="c-blue">URL</span>(<span class="c-str">'/api/auth/jwks'</span>, <span class="c-str">'http://localhost:5000'</span>)
+)
+<span class="c-yellow">const</span> { <span class="c-white">payload</span> } <span class="c-green">=</span> <span class="c-yellow">await</span> <span class="c-blue">jwtVerify</span>(<span class="c-white">token</span>, <span class="c-white">JWKS</span>)
+        </div>
+      </div>
+    </section>
+
+    <!-- Tech Cards -->
+    <section>
+      <div class="section-title">🛠 Tech Stack</div>
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <h3>Express 5 + TypeScript</h3>
+          <p>ESM-native setup with full type safety. Import/export instead of require/module.exports.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔐</div>
+          <h3>jose JWT (RS256)</h3>
+          <p>Asymmetric RSA keys. Server signs, clients verify. Public key served via JWKS endpoint.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🍃</div>
+          <h3>MongoDB (Native Driver)</h3>
+          <p>No ORM overhead. Direct access to collections. Flexible schema for AI-powered features.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔄</div>
+          <h3>tsx Watch Mode</h3>
+          <p>Hot-reload TypeScript without a build step. Run <code style="color:var(--green-400)">npm run dev</code> and start coding.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>🌿 PlantCompanion API &nbsp;·&nbsp; Built with Express + TypeScript &nbsp;·&nbsp;
+        <a href="/api/health">Health</a> &nbsp;·&nbsp;
+        <a href="/api/auth/jwks">JWKS</a>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // Live health check ping
+    fetch('/api/health')
+      .then(r => r.json())
+      .then(d => {
+        const dot = document.querySelector('.status-dot');
+        const pill = document.querySelector('.status-pill');
+        if (d.success) {
+          dot.style.background = '#22c55e';
+          pill.querySelector('span') && (pill.lastChild.textContent = ' Server Online');
+        }
+      })
+      .catch(() => {
+        document.querySelector('.status-dot').style.background = '#ef4444';
+      });
+  </script>
+</body>
+</html>
