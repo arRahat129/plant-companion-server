@@ -10,13 +10,9 @@
 //    1. Create src/routes/plants.routes.ts
 //    2. Uncomment the import and use() below
 // ============================================================
-
 import { Router, Request, Response } from 'express';
 import { authRouter } from './auth.routes.js';
-// import { plantsRouter } from './plants.routes.js';  // ← add later
-// import { usersRouter } from './users.routes.js';    // ← add later
-// import { aiRouter } from './ai.routes.js';          // ← add later
-
+import { myPlantsRouter } from './my-plants.routes.js';
 export const apiRouter = Router();
 
 // ─── Health Check — GET /api/health ──────────────────────────
@@ -33,7 +29,7 @@ apiRouter.get('/health', (req: Request, res: Response) => {
 });
 
 // ─── Mount Sub-Routers ────────────────────────────────────────
-apiRouter.use('/auth', authRouter);         // /api/auth/*
+apiRouter.use('/add-plant', addPlantRouter); // /api/add-plant
 // apiRouter.use('/plants', plantsRouter);  // /api/plants/*
 // apiRouter.use('/users', usersRouter);    // /api/users/*
 // apiRouter.use('/ai', aiRouter);          // /api/ai/*

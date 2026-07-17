@@ -12,7 +12,7 @@
 // ============================================================
 
 import { generateKeyPair, exportPKCS8, exportSPKI } from 'jose';
-import { Buffer } from 'node:buffer';
+
 
 console.log('\n🔑 Generating RSA-2048 key pair for JWT signing...\n');
 console.log('   This uses asymmetric cryptography:');
