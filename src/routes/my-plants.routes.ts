@@ -89,7 +89,7 @@ router.patch('/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: 'Plant not found or access denied' });
     }
 
-    const { title, price, quantity, images, ...rest } = req.body;
+    const { title, price, quantity, images, availability, ...rest } = req.body;
 
     if (title !== undefined && !String(title).trim()) {
       return res.status(400).json({ success: false, message: 'Title cannot be empty' });
@@ -102,10 +102,11 @@ router.patch('/:id', async (req: Request, res: Response) => {
     }
 
     const updateDoc: Record<string, unknown> = { ...rest };
-    if (title    !== undefined) updateDoc.title    = String(title).trim();
-    if (price    !== undefined) updateDoc.price    = Number(price);
-    if (quantity !== undefined) updateDoc.quantity = Number(quantity);
-    if (Array.isArray(images))  updateDoc.images   = images;
+    if (title        !== undefined) updateDoc.title        = String(title).trim();
+    if (price        !== undefined) updateDoc.price        = Number(price);
+    if (quantity     !== undefined) updateDoc.quantity     = Number(quantity);
+    if (Array.isArray(images))      updateDoc.images       = images;
+    if (availability !== undefined) updateDoc.availability = String(availability).trim();
     updateDoc.updatedAt = new Date();
 
     await db.collection('plants').updateOne(

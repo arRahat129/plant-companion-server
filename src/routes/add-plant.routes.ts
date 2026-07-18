@@ -73,6 +73,8 @@ router.post('/', async (req: Request, res: Response) => {
       petSafe:     petSafe === true || petSafe === 'true',
       category,
       description: description ? String(description).trim() : '',
+      status:      'pending',
+      availability:'Available',
       owner: {
         id:    userId    || '',
         name:  userName  || '',
