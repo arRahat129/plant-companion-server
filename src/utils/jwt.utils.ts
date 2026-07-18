@@ -20,7 +20,6 @@ import {
   importSPKI,
   exportJWK,
   type JWTPayload,
-  type KeyLike,
 } from 'jose';
 import { env } from '../config/env.js';
 
@@ -28,10 +27,10 @@ import { env } from '../config/env.js';
 const KEY_ID = 'plant-companion-key-1';
 
 // ─── Load keys from .env (cached after first load) ───────────
-let _privateKey: KeyLike | null = null;
-let _publicKey: KeyLike | null = null;
+let _privateKey: any = null;
+let _publicKey: any = null;
 
-const getPrivateKey = async (): Promise<KeyLike> => {
+const getPrivateKey = async (): Promise<any> => {
   if (_privateKey) return _privateKey;
   // Decode Base64 → PEM string → CryptoKey
   const pem = Buffer.from(env.JWT_PRIVATE_KEY_BASE64, 'base64').toString('utf-8');
@@ -39,7 +38,7 @@ const getPrivateKey = async (): Promise<KeyLike> => {
   return _privateKey;
 };
 
-const getPublicKey = async (): Promise<KeyLike> => {
+const getPublicKey = async (): Promise<any> => {
   if (_publicKey) return _publicKey;
   const pem = Buffer.from(env.JWT_PUBLIC_KEY_BASE64, 'base64').toString('utf-8');
   _publicKey = await importSPKI(pem, env.JWT_ALGORITHM);

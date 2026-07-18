@@ -37,7 +37,8 @@ const app = express();
 app.use(
   cors({
     origin: env.CLIENT_URL,
-    credentials: true, // Allow cookies/auth headers
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "X-User-ID"],
   })
 );
 
