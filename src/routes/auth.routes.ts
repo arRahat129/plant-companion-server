@@ -87,6 +87,49 @@ authRouter.post('/register', async (req, res) => {
   }
 });
 
+// ─── POST /api/auth/sign-up/email ──────────────────────────────────
+// Alias for sign‑up via Better‑Auth client (email/password)
+authRouter.post('/sign-up/email', async (req, res) => {
+  try {
+    // Reuse the same register logic – expects name, email, password
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      res.status(400).json({ success: false, message: 'Name, email and password are required' });
+      return;
+    }
+    const db = getDB();
+    const usersCollection = db.collection('users');
+    const existingUser = await usersCollection.findOne({ email });
+    if (existingUser) {
+      res.status(409).json({ success: false, message: 'Email already in use' });
+      return;
+    }
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const result = await usersCollection.insertOne({
+      name,
+      email,
+      password: hashedPassword,
+      role: 'user',
+      createdAt: new Date(),
+    });
+    const token = await signJWT({
+      sub: result.insertedId.toString(),
+      email,
+      name,
+      role: 'user',
+    });
+    res.status(201).json({
+      success: true,
+      message: 'Account created successfully',
+      token,
+      user: { id: result.insertedId, name, email, role: 'user' },
+    });
+  } catch (error) {
+    console.error('Sign‑up email error:', error);
+    res.status(500).json({ success: false, message: 'Registration failed' });
+  }
+});
+
 // ─── POST /api/auth/login ─────────────────────────────────────
 authRouter.post('/login', async (req, res) => {
   try {
