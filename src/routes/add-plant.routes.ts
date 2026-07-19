@@ -74,6 +74,8 @@ router.post('/', async (req: Request, res: Response) => {
       category,
       description: description ? String(description).trim() : '',
       status:      'pending',
+      adminDeleted: false,
+      hasFeedback: false,
       availability:'Available',
       owner: {
         id:    userId    || '',

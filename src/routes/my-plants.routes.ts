@@ -108,11 +108,16 @@ router.patch('/:id', async (req: Request, res: Response) => {
     if (Array.isArray(images))      updateDoc.images       = images;
     if (availability !== undefined) updateDoc.availability = String(availability).trim();
     updateDoc.updatedAt = new Date();
+    updateDoc.hasFeedback = false; // Mark feedback as resolved when edited
+    updateDoc.status = 'pending'; // Reset status to pending when edited
 
     await db.collection('plants').updateOne(
       { _id: new ObjectId(id) },
       { $set: updateDoc }
     );
+
+    // Delete associated feedbacks
+    await db.collection('feedbacks').deleteMany({ plantId: id });
 
     return res.json({ success: true, message: 'Plant updated successfully' });
   } catch (err: any) {

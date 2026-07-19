@@ -18,7 +18,7 @@ router.get('/', async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 9;
     const skip = (page - 1) * limit;
 
-    const query: any = {};
+    const query: any = { status: 'accepted' };
 
     // Filter by Category
     if (req.query.category && typeof req.query.category === 'string' && req.query.category !== 'All') {

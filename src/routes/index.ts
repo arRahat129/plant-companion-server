@@ -9,6 +9,8 @@ import { addPlantRouter } from './add-plant.routes.js';
 import { myPlantsRouter } from './my-plants.routes.js';
 import { plantsRouter }   from './plants.routes.js';
 import { requestsRouter } from './requests.routes.js';
+import { adminRouter }    from './admin.routes.js';
+import { feedbacksRouter} from './feedbacks.routes.js';
 
 export const apiRouter = Router();
 
@@ -29,3 +31,5 @@ apiRouter.use('/add-plant', addPlantRouter);  // /api/add-plant
 apiRouter.use('/my-plants', myPlantsRouter);  // /api/my-plants
 apiRouter.use('/plants',    plantsRouter);    // /api/plants/:id
 apiRouter.use('/requests',  requestsRouter);  // /api/requests
+apiRouter.use('/admin',     adminRouter);     // /api/admin/*
+apiRouter.use('/feedbacks', feedbacksRouter); // /api/feedbacks/*
