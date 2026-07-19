@@ -48,4 +48,6 @@ export const env = {
 
   // ── CORS ───────────────────────────────────────────────────
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:3000',
+
+  HF_INFERENCE_TOKEN: required('HF_INFERENCE_TOKEN'),
 };

@@ -13,6 +13,8 @@
     "keys": "tsx scripts/generate-keys.ts"
   },
   "dependencies": {
+    "@google/genai": "^2.12.0",
+    "@huggingface/inference": "^4.13.23",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",

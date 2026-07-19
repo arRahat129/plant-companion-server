@@ -13,7 +13,9 @@
 //  is different!
 // ============================================================
 
+
 import express, { Request, Response, NextFunction } from 'express';
+import dns from 'node:dns';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -21,7 +23,9 @@ import { fileURLToPath } from 'url';
 import { connectDB } from './config/db.js';
 import { env } from './config/env.js';
 import { apiRouter } from './routes/index.js';
+import { diseaseRouter } from './routes/diseases.js';
 
+dns.setServers(['1.1.1.1', '8.8.8.8']);
 // ─── ESM equivalent of __dirname ─────────────────────────────
 // In CommonJS, __dirname is built-in.
 // In ESM (import/export), we have to derive it manually:
@@ -38,15 +42,15 @@ app.use(
   cors({
     origin: env.CLIENT_URL,
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization", "X-User-ID"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-User-ID", "x-user-id", "x-user-name", "x-user-email", "x-user-image"],
   })
 );
 
 // Parse JSON request bodies (like req.body in POST requests)
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 
 // Parse URL-encoded form data
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // ─── Static Files — Landing Page ─────────────────────────────
 // Serves the public/index.html when someone visits http://localhost:5000
@@ -61,6 +65,8 @@ app.use('/api', apiRouter);
 app.get('/', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
+
+apiRouter.use('/diseases', diseaseRouter);
 
 // ─── 404 Handler ─────────────────────────────────────────────
 // Catches any request that didn't match a route above
