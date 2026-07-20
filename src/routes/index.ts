@@ -12,6 +12,7 @@ import { requestsRouter } from './requests.routes.js';
 import { adminRouter }    from './admin.routes.js';
 import { feedbacksRouter} from './feedbacks.routes.js';
 import { diseaseRouter }  from './diseases.js';
+import { userStatsRouter } from './user-stats.routes.js';
 
 export const apiRouter = Router();
 
@@ -35,3 +36,4 @@ apiRouter.use('/requests',  requestsRouter);  // /api/requests
 apiRouter.use('/admin',     adminRouter);     // /api/admin/*
 apiRouter.use('/feedbacks', feedbacksRouter); // /api/feedbacks/*
 apiRouter.use('/diseases',  diseaseRouter);   // /api/diseases/*
+apiRouter.use('/user',      userStatsRouter);  // /api/user/*

@@ -185,3 +185,39 @@ authRouter.get('/me', authenticate, (req, res) => {
     user: req.user,
   });
 });
+
+// ─── PATCH /api/auth/profile ─────────────────────────────────
+authRouter.patch('/profile', async (req, res) => {
+  try {
+    const { userId, name, email, image } = req.body;
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'User ID is required' });
+    }
+
+    const db = getDB();
+    const updateDoc: any = {};
+    if (name !== undefined) updateDoc.name = name.trim();
+    if (email !== undefined) updateDoc.email = email.trim();
+    if (image !== undefined) updateDoc.image = image;
+    updateDoc.updatedAt = new Date();
+
+    // Perform queries on both 'user' and 'users' collections
+    // Support lookup via ObjectId and raw string id to prevent version conflicts
+    const objectId = ObjectId.isValid(userId) ? new ObjectId(userId) : null;
+
+    if (objectId) {
+      await db.collection('user').updateOne({ _id: objectId }, { $set: updateDoc });
+      await db.collection('users').updateOne({ _id: objectId }, { $set: updateDoc });
+    }
+    
+    await db.collection('user').updateOne({ _id: userId as any }, { $set: updateDoc });
+    await db.collection('user').updateOne({ id: userId }, { $set: updateDoc });
+    await db.collection('users').updateOne({ _id: userId as any }, { $set: updateDoc });
+    await db.collection('users').updateOne({ id: userId }, { $set: updateDoc });
+
+    return res.json({ success: true, message: 'Profile updated successfully' });
+  } catch (error: any) {
+    console.error('Profile update failure:', error);
+    return res.status(500).json({ success: false, message: 'Failed to update profile info' });
+  }
+});

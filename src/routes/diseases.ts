@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { getDB } from '../config/db.js';
 import { env } from '../config/env.js';
 import { InferenceClient } from "@huggingface/inference";
+import { ObjectId } from 'mongodb';
 
 const router = Router();
 
@@ -37,6 +38,61 @@ router.get('/count', async (req: Request, res: Response) => {
     } catch (err: any) {
         console.error('Count fetch error:', err);
         return res.status(500).json({ success: false, message: 'Failed to fetch scan count' });
+    }
+});
+
+/**
+ * GET /api/diseases/history
+ */
+router.get('/history', async (req: Request, res: Response) => {
+    try {
+        const user = getSessionUser(req);
+        if (!user.id) {
+            return res.status(401).json({ success: false, message: 'Authentication required' });
+        }
+
+        const db = getDB();
+        const history = await db.collection('diseaseCollection')
+            .find({ userId: user.id })
+            .sort({ createdAt: -1 })
+            .toArray();
+
+        return res.json({ success: true, history });
+    } catch (err: any) {
+        console.error('History fetch error:', err);
+        return res.status(500).json({ success: false, message: 'Failed to fetch scan history' });
+    }
+});
+
+/**
+ * DELETE /api/diseases/:id
+ */
+router.delete('/:id', async (req: Request, res: Response) => {
+    try {
+        const user = getSessionUser(req);
+        if (!user.id) {
+            return res.status(401).json({ success: false, message: 'Authentication required' });
+        }
+
+        const id = req.params.id;
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ success: false, message: 'Invalid scan ID' });
+        }
+
+        const db = getDB();
+        const result = await db.collection('diseaseCollection').deleteOne({
+            _id: new ObjectId(id),
+            userId: user.id,
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ success: false, message: 'Scan record not found or access denied' });
+        }
+
+        return res.json({ success: true, message: 'Scan history record deleted' });
+    } catch (err: any) {
+        console.error('Delete scan history error:', err);
+        return res.status(500).json({ success: false, message: 'Failed to delete scan history' });
     }
 });
 
@@ -133,6 +189,8 @@ Provide clear step-by-step biological treatments and chemical interventions.
             diseaseName: detectedDisease,
             aiLabels: classificationResult.slice(0, 5),
             reportMarkdown: detailedReport,
+            plantImageBase64: imageBase64,
+            mimeType: mimeType,
             createdAt: new Date(),
         };
 
