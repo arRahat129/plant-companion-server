@@ -13,6 +13,7 @@ import { getJWKS, signJWT } from '../utils/jwt.utils.js';
 import { getDB } from '../config/db.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import bcrypt from 'bcryptjs';
+import { ObjectId } from 'mongodb';
 
 export const authRouter = Router();
 
@@ -209,7 +210,7 @@ authRouter.patch('/profile', async (req, res) => {
       await db.collection('user').updateOne({ _id: objectId }, { $set: updateDoc });
       await db.collection('users').updateOne({ _id: objectId }, { $set: updateDoc });
     }
-    
+
     await db.collection('user').updateOne({ _id: userId as any }, { $set: updateDoc });
     await db.collection('user').updateOne({ id: userId }, { $set: updateDoc });
     await db.collection('users').updateOne({ _id: userId as any }, { $set: updateDoc });
