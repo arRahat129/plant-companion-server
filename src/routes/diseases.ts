@@ -75,13 +75,13 @@ router.delete('/:id', async (req: Request, res: Response) => {
         }
 
         const id = req.params.id;
-        if (!ObjectId.isValid(id)) {
+        if (!ObjectId.isValid(id as string)) {
             return res.status(400).json({ success: false, message: 'Invalid scan ID' });
         }
 
         const db = getDB();
         const result = await db.collection('diseaseCollection').deleteOne({
-            _id: new ObjectId(id),
+            _id: new ObjectId(id as string),
             userId: user.id,
         });
 
