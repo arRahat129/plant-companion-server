@@ -50,4 +50,7 @@ export const env = {
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:3000',
 
   HF_INFERENCE_TOKEN: required('HF_INFERENCE_TOKEN'),
+
+  // ── AI ──────────────────────────────────────────────────────
+  GEMINI_API_KEY: required('GEMINI_API_KEY'),
 };

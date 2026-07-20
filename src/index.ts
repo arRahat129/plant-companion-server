@@ -23,7 +23,6 @@ import { fileURLToPath } from 'url';
 import { connectDB } from './config/db.js';
 import { env } from './config/env.js';
 import { apiRouter } from './routes/index.js';
-import { diseaseRouter } from './routes/diseases.js';
 
 dns.setServers(['1.1.1.1', '8.8.8.8']);
 // ─── ESM equivalent of __dirname ─────────────────────────────
@@ -66,7 +65,6 @@ app.get('/', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-apiRouter.use('/diseases', diseaseRouter);
 
 // ─── 404 Handler ─────────────────────────────────────────────
 // Catches any request that didn't match a route above

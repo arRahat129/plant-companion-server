@@ -11,6 +11,7 @@ import { plantsRouter }   from './plants.routes.js';
 import { requestsRouter } from './requests.routes.js';
 import { adminRouter }    from './admin.routes.js';
 import { feedbacksRouter} from './feedbacks.routes.js';
+import { diseaseRouter }  from './diseases.js';
 
 export const apiRouter = Router();
 
@@ -33,3 +34,4 @@ apiRouter.use('/plants',    plantsRouter);    // /api/plants/:id
 apiRouter.use('/requests',  requestsRouter);  // /api/requests
 apiRouter.use('/admin',     adminRouter);     // /api/admin/*
 apiRouter.use('/feedbacks', feedbacksRouter); // /api/feedbacks/*
+apiRouter.use('/diseases',  diseaseRouter);   // /api/diseases/*
