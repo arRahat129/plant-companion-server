@@ -156,7 +156,7 @@ router.patch('/users/:id/role', async (req: Request, res: Response) => {
     }
 
     const db = getDB();
-    const objectId = ObjectId.isValid(id) ? new ObjectId(id) : null;
+    const objectId = ObjectId.isValid(id as string) ? new ObjectId(id as string) : null;
 
     if (objectId) {
       await db.collection('user').updateOne({ _id: objectId }, { $set: { role } });
@@ -179,7 +179,7 @@ router.delete('/users/:id', async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
     const db = getDB();
-    const objectId = ObjectId.isValid(id) ? new ObjectId(id) : null;
+    const objectId = ObjectId.isValid(id as string) ? new ObjectId(id as string) : null;
 
     if (objectId) {
       await db.collection('user').deleteOne({ _id: objectId });
